@@ -37,9 +37,8 @@
                   with pkgs;
                   [
 			        qemu
-
 			        nasm
-
+			        pkgs.pkgsCross.i686-embedded.buildPackages.gcc
                     clang-tools
                     cmake
                     codespell
