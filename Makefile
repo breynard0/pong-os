@@ -1,23 +1,28 @@
 init_build_env:
+	rm -r work
 	mkdir -p work
 
 .ONESHELL:
 build_c:
 	cd work
-	gcc -march=i686 -m32 -ffreestanding -nostdlib -nostartfiles -c ../src/kernel.c -o kernel.o
+	i686-elf-gcc -m32 -ffreestanding -c ../src/kernel.c -o kernel.o
 	strip --strip-all kernel.o
+	i686-elf-ld -melf_i386 -o kernel.bin -Ttext 0x1000 --oformat binary kernel.o
 
 .ONESHELL:
 build_asm: build_c
 	cd work
 # build bootloader
-	nasm -f bin -o bootloader.o ../src/bootloader.asm
-# write 512 bytes of zeros into iso file
-	dd if=/dev/zero of=boot.iso bs=512 count=1
-# copy bootloader into iso
-	dd if=bootloader.o of=boot.iso seek=0 count=1 conv=notrunc
-# copy in boot signature
-	echo -n -e "\x55\xAA" | dd of=boot.iso obs=1 seek=510 count=1 conv=notrunc
+	nasm -f bin -o bootloader_unbootable.bin ../src/bootloader.asm
+# set up bootloader.bin to be bootable
+	dd if=/dev/zero of=bootloader.bin bs=1 count=510 conv=notrunc
+	echo -e -n "\x55\xAA" | dd of=bootloader.bin oflag=append conv=notrunc
+# copy in bootloader code
+	dd if=bootloader_unbootable.bin of=bootloader.bin conv=notrunc
+# concatenate C executable
+	cat bootloader.bin kernel.bin > boot.iso
+# add on 128 sectors worth of zeroes so I don't have to worry about sector counts
+	dd if=/dev/zero of=boot.iso bs=1 count=65536 oflag=append conv=notrunc
 
 build: init_build_env build_asm
 	#cd work && \
