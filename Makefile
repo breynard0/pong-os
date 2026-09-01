@@ -21,6 +21,6 @@ run: build
 	work/a.out
 
 test: build
-	qemu-system-x86_64 -m 128 -drive format=raw,file=work/boot.iso -d int -no-reboot -no-shutdown | tee work/out.log
+	qemu-system-x86_64 -m 128 -drive format=raw,file=work/boot.iso -d int -no-reboot -no-shutdown
 
 all: run
