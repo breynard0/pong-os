@@ -4,7 +4,8 @@ init_build_env:
 .ONESHELL:
 build_c:
 	cd work
-	i686-elf-gcc -c ../src/kernel.c -o kernel.o -std=gnu99 -ffreestanding -Wall -Wextra
+	gcc -march=i686 -m32 -ffreestanding -nostdlib -nostartfiles -c ../src/kernel.c -o kernel.o
+	strip --strip-all kernel.o
 
 .ONESHELL:
 build_asm: build_c
