@@ -23,4 +23,7 @@ run: build
 test: build
 	qemu-system-x86_64 -m 128 -drive format=raw,file=work/boot.iso -d int -no-reboot -no-shutdown
 
+debug: build
+	qemu-system-x86_64 -s -S -m 128 -drive format=raw,file=work/boot.iso -d int -no-reboot -no-shutdown
+
 all: run

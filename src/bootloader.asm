@@ -14,30 +14,61 @@ int 0x14
 
 call init_video
 
-mov di, message2
-call write_text_tty
+; mov di, message2
+; call write_text_tty
+
+mov dx, 4
+call write_digit_tty
+mov dx, 5
+call write_digit_tty
+call write_newline
+mov dx, 181
+call write_byte_tty
+call write_newline
 
 hlt
 
-write_text_serial:
-    wts_loop:
-    mov ah, 0x1 ; send 1 byte
-    mov bx, message ; prep base register with address of character
-    add bx, cx
-    mov al, [bx]
-    int 0x14
-
-    inc cx
-    cmp [bx], 0xA
-    jne wts_loop
-
-    ret
 
 init_video:
     mov ah, 0
-    mov al, 2
+    mov al, 0x2
     int 0x10
     ret
+
+write_newline:
+    mov ah, 0xE ; write tty
+    mov al, 0xD
+    int 0x10
+    mov al, 0xA
+    int 0x10
+    ret
+
+write_digit_tty:
+    mov ah, 0xE ; write tty
+    add dx, '0' ; convert to ASCII
+    mov al, dl ; print number
+    int 0x10
+    ret
+
+write_byte_tty:
+    mov ax, dx
+    mov dx, 0
+    mov cx, 100
+    div cx
+    mov cx, dx
+    mov dx, ax
+    call write_digit_tty
+    mov ax, cx
+    mov dx, 0
+    mov cx, 10
+    div cx
+    mov cx, dx
+    mov dx, ax
+    call write_digit_tty
+    mov dx, cx
+    call write_digit_tty
+    ret
+
 
 write_text_tty:
     mov cx, 0 ; init counter
