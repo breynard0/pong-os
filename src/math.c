@@ -31,3 +31,13 @@ uint32_t absolute(const int32_t x)
     }
     return x;
 }
+
+int32_t maximum(const int32_t a, const int32_t b)
+{
+    return a > b ? a : b;
+}
+
+int32_t minimum(const int32_t a, const int32_t b)
+{
+    return a < b ? a : b;
+}

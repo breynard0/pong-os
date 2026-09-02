@@ -139,14 +139,29 @@ void draw_rect(const uint32_t x, const uint32_t y, uint32_t width, const uint32_
 
 void draw_circle(const int32_t center_x, const int32_t center_y, int32_t radius, const uint8_t colour)
 {
-    for (int32_t x = center_x - radius; x <= center_x + radius; x++)
+    int32_t min_byte_x = maximum((center_x - radius) / 8, 0);
+    int32_t min_byte_y = maximum(center_y - radius, 0);
+    int32_t max_byte_x = minimum((center_x + radius) / 8, WIDTH);
+    int32_t max_byte_y = minimum(center_y + radius, HEIGHT);
+
+    for (int draw_y = min_byte_y; draw_y <= max_byte_y; draw_y++)
     {
-        for (int32_t y = center_y - radius; y <= center_y + radius; y++)
+        for (int draw_x = min_byte_x; draw_x <= max_byte_x; draw_x++)
         {
-            if (distance(absolute(center_x - x), absolute(center_y - y)) <= radius)
+            uint32_t byte_offset = compute_byte_offset(draw_x, draw_y);
+            uint8_t colours[8] = {};
+            read_video_bytes_8_channel(byte_offset, colours);
+
+            for (int i = 0; i < 8; i++)
             {
-                put_pixel(x, y, colour);
+                uint32_t d = distance(absolute((draw_x * 8 + i) - center_x), absolute(draw_y - center_y));
+                if (d <= radius)
+                {
+                    colours[i] = colour;
+                }
             }
+
+            write_video_byte(byte_offset, colours);
         }
     }
 }
