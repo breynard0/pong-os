@@ -29,7 +29,7 @@ gdtr:
     dd gdt
 
 KERNEL_OFFSET equ 0x1000
-KERNEL_SECTOR_COUNT equ 0x80
+KERNEL_SECTOR_COUNT equ 0x30
 
 boot_drive: db 0
 
@@ -50,13 +50,10 @@ _start:
     mov dx, 0x0 ; set COM1
     int 0x14
 
-    mov dl, 1
-    call disk_load
     ; log startup message
     call log_startup
 
-;     call load_kernel ; load my C code into memory
-
+    call load_kernel_from_disk ; load my C code into memory
 
     call init_video ; set up VGA
 
@@ -89,9 +86,24 @@ activate_a20:
     ret
 
 disk_load:
-    ; input is zero indexed sector, convert to one-indexed then set cl
-    inc dl
     mov cl, dl
+    dec cl
+
+    ; set target address, schema is (ES << 4) + bx
+    ; bx is indexed sector
+    mov bx, 0
+    mov es, bx
+
+    mov ax, 512
+    mov ch, 0
+    mul cx
+
+    mov bx, KERNEL_OFFSET
+    add bx, ax
+
+    ; input is zero indexed sector, convert to one-indexed
+    inc cl
+    inc cl
 
     mov ah, 0x02
     mov dl, [boot_drive] ; load drive
@@ -99,11 +111,19 @@ disk_load:
     mov dh, 0, ; first side
     mov al, 1 ; read 1 sector
 
-    ; set target address, schema is (ES << 4) + bx
-    mov bx, 0
-    mov es, bx
-    mov bx, KERNEL_OFFSET
     int 0x13
+    ret
+
+load_kernel_from_disk:
+    mov cl, 1
+    kernel_load_loop:
+        mov dl, cl
+        push cx ; disk_load clobbers cl so put it in stack
+        call disk_load
+        pop cx
+        inc cl
+        cmp cl, KERNEL_SECTOR_COUNT
+        jl kernel_load_loop
     ret
 
 init_video:

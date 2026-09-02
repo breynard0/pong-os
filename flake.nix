@@ -50,7 +50,7 @@
                     vcpkg-tool
                     self.formatter.${system}
                   ]
-                  ++ lib.optionals (!stdenv.hostPlatform.isDarwin) [ gdb-multiarch ];
+                  ++ lib.optionals (!stdenv.hostPlatform.isDarwin) [ gdb ];
               };
         }
       );

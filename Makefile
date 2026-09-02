@@ -5,9 +5,12 @@ init_build_env:
 .ONESHELL:
 build_c:
 	cd work
+	nasm -f elf32 -o kernel_bootstrap.o ../src/kernel_bootstrap.asm
 	i686-elf-gcc -m32 -ffreestanding -c ../src/kernel.c -o kernel.o
-	strip --strip-all kernel.o
-	i686-elf-ld -melf_i386 -o kernel.bin -Ttext 0x1000 --oformat binary kernel.o
+	i686-elf-gcc -m32 -ffreestanding -mgeneral-regs-only -c ../src/idt.c -o idt.o
+	i686-elf-gcc -m32 -ffreestanding -mgeneral-regs-only -c ../src/vga.c -o vga.o
+	i686-elf-gcc -m32 -ffreestanding -mgeneral-regs-only -c ../src/io.c -o io.o
+	i686-elf-ld -melf_i386 -o kernel.bin -Ttext 0x1000 --oformat binary kernel_bootstrap.o kernel.o idt.o vga.o io.o
 
 .ONESHELL:
 build_asm: build_c
