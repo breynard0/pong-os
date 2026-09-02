@@ -31,6 +31,12 @@ gdtr:
 KERNEL_OFFSET equ 0x1000
 KERNEL_SECTOR_COUNT equ 0x30
 
+; text
+; VIDEO_MODE equ 0x02
+
+; graphics
+VIDEO_MODE equ 0x12
+
 boot_drive: db 0
 
 section .text
@@ -51,7 +57,8 @@ _start:
     int 0x14
 
     ; log startup message
-    call log_startup
+    mov ax, startup_message
+    call log_message
 
     call load_kernel_from_disk ; load my C code into memory
 
@@ -63,11 +70,12 @@ _start:
 
     call enter_protected ; protected mode!
 
-log_startup:
+log_message:
     mov cx, 0
+    mov bx, ax
+    dec bx
     log_startup_loop:
-        mov bx, startup_message
-        add bx, cx
+        inc bx
 
         mov ah, 0x01
         mov al, [bx]
@@ -128,7 +136,7 @@ load_kernel_from_disk:
 
 init_video:
     mov ah, 0
-    mov al, 0x2
+    mov al, VIDEO_MODE
     int 0x10
     ret
 

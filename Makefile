@@ -11,8 +11,8 @@ build_c:
 	i686-elf-gcc -m32 -ffreestanding -mgeneral-regs-only -c ../src/vga.c -o vga.o
 	i686-elf-gcc -m32 -ffreestanding -mgeneral-regs-only -c ../src/io.c -o io.o
 	i686-elf-gcc -m32 -ffreestanding -mgeneral-regs-only -O3 -c ../src/keyboard.c -o keyboard.o
-	i686-elf-gcc -m32 -ffreestanding -mgeneral-regs-only -c ../src/paging.c -o paging.o
-	i686-elf-ld -melf_i386 -o kernel.bin -Ttext 0x1000 --oformat binary kernel_bootstrap.o kernel.o idt.o vga.o io.o keyboard.o paging.o
+	i686-elf-gcc -m32 -ffreestanding -mgeneral-regs-only -c ../src/graphics.c -o graphics.o
+	i686-elf-ld -melf_i386 -o kernel.bin -Ttext 0x1000 --oformat binary kernel_bootstrap.o kernel.o idt.o vga.o io.o keyboard.o graphics.o
 
 .ONESHELL:
 build_asm: build_c
@@ -38,8 +38,5 @@ run: build
 
 test: build
 	qemu-system-x86_64 -m 128 -drive format=raw,file=work/boot.iso -d int -no-reboot -no-shutdown
-
-debug: build
-	qemu-system-x86_64 -s -S -m 128 -drive format=raw,file=work/boot.iso -d int -no-reboot -no-shutdown
 
 all: run
