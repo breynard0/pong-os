@@ -127,6 +127,10 @@ static const struct KeyMapping mappings[256] = {
     QWERTY_KEY('.', 0)
 };
 
+// special case for inputs
+uint8_t left_down = 0;
+uint8_t right_down = 0;
+
 char scancode_to_char(uint8_t scancode)
 {
     static uint8_t modifiers = 0;
@@ -182,6 +186,10 @@ char scancode_to_char(uint8_t scancode)
         }
         return 0;
     }
+
+    // game inputs
+    if (out == 'a') left_down = pressed;
+    if (out == 'd') right_down = pressed;
 
     // shift selection
     if ((modifiers & 0x04) != 0 || (modifiers & 0x10) != 0)

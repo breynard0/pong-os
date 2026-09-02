@@ -21,6 +21,8 @@ struct __attribute__((packed)) IDTDescriptor32
 
 extern struct IDTDescriptor32 idt_descriptor;
 
+extern uint32_t counter;
+
 void init_idt();
 
 #endif //PONG_OS_IDT_H

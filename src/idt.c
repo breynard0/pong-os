@@ -1,6 +1,7 @@
 #include "idt.h"
 #include "io.h"
 #include "keyboard.h"
+#include "pong.h"
 
 #include "vga.h"
 
@@ -80,10 +81,14 @@ __attribute__((interrupt)) static void keyboard_interrupt(struct interrupt_frame
     PIC_sendEOI(1);
 }
 
+uint32_t counter = 0;
+
 struct interrupt_frame;
 
 __attribute__((interrupt)) static void timer_interrupt(struct interrupt_frame* frame)
 {
+    counter++;
+    if (counter >= 60) counter = 0;
     PIC_sendEOI(0);
 }
 
