@@ -1,5 +1,6 @@
 #include "idt.h"
 #include "io.h"
+#include "keyboard.h"
 
 #include "vga.h"
 
@@ -61,11 +62,21 @@ struct interrupt_frame;
 
 __attribute__((interrupt)) static void keyboard_interrupt(struct interrupt_frame* frame)
 {
-    uint8_t sc = inb(0x60);
-    if (sc == 0x04)
+    static uint32_t cursor = 0;
+    const uint8_t sc = inb(0x60);
+    char letter = scancode_to_char(sc);
+    if (letter == 0x08) // backspace checking
     {
-        display_character_at_vga_buffer('3', 0);
+        if (cursor > 0) cursor--;
+        display_character_at_vga_buffer(0, cursor);
     }
+    else if (letter != 0)
+    {
+        display_character_at_vga_buffer(letter, cursor);
+        cursor++;
+    }
+    set_cursor_pos(cursor);
+
     PIC_sendEOI(1);
 }
 
@@ -73,47 +84,32 @@ struct interrupt_frame;
 
 __attribute__((interrupt)) static void timer_interrupt(struct interrupt_frame* frame)
 {
+    PIC_sendEOI(0);
+}
+
+static void init_interrupt_gate(const uint8_t idt_pos, void* handler)
+{
+    struct InterruptDescriptor32* descriptor = &IDT[idt_pos];
+    const uint32_t handler_addr = (uint32_t)handler;
+    descriptor->offset_1 = handler_addr & 0x0000ffff;
+    descriptor->offset_2 = (handler_addr & 0xffff0000) >> (4 * 4);
+    descriptor->type_attributes = 0b10001110;
+    descriptor->zero = 0;
+    descriptor->selector = 0x08;
 }
 
 void init_idt()
 {
     PIC_remap(0x20, 0x28);
 
-    {
-        // Initialize General Protection fault
-        struct InterruptDescriptor32* general_protection_descriptor = &IDT[0x0D];
-        void* gp_handler = general_protection_fault;
-        const uint32_t gp_handler_addr = (uint32_t)gp_handler;
-        general_protection_descriptor->offset_1 = gp_handler_addr & 0x0000ffff;
-        general_protection_descriptor->offset_2 = (gp_handler_addr & 0xffff0000) >> (4 * 4);
-        general_protection_descriptor->type_attributes = 0b10001110;
-        general_protection_descriptor->zero = 0;
-        general_protection_descriptor->selector = 0x08;
-    }
+    // Initialize General Protection fault
+    init_interrupt_gate(0x0D, general_protection_fault);
 
-    {
-        // Initialize Timer interrupt
-        struct InterruptDescriptor32* timer_descriptor = &IDT[0x20];
-        void* timer_handler = keyboard_interrupt;
-        const uint32_t timer_handler_addr = (uint32_t)timer_handler;
-        timer_descriptor->offset_1 = timer_handler_addr & 0x0000ffff;
-        timer_descriptor->offset_2 = (timer_handler_addr & 0xffff0000) >> (4 * 4);
-        timer_descriptor->type_attributes = 0b10001110;
-        timer_descriptor->zero = 0;
-        timer_descriptor->selector = 0x08;
-    }
+    // Initialize Timer interrupt
+    init_interrupt_gate(0x20, timer_interrupt);
 
-    {
-        // Initialize Keyboard interrupt
-        struct InterruptDescriptor32* keyboard_descriptor = &IDT[0x21];
-        void* keyboard_handler = keyboard_interrupt;
-        const uint32_t keyboard_handler_addr = (uint32_t)keyboard_handler;
-        keyboard_descriptor->offset_1 = keyboard_handler_addr & 0x0000ffff;
-        keyboard_descriptor->offset_2 = (keyboard_handler_addr & 0xffff0000) >> (4 * 4);
-        keyboard_descriptor->type_attributes = 0b10001110;
-        keyboard_descriptor->zero = 0;
-        keyboard_descriptor->selector = 0x08;
-    }
+    // Initialize Keyboard interrupt
+    init_interrupt_gate(0x21, keyboard_interrupt);
 
     // Load IDT
     idt_descriptor.offset = (uint32_t)(void*)&IDT;
