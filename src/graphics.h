@@ -22,6 +22,7 @@ enum COLOURS
     YELLOW,
     WHITE
 };
-void put_pixel(uint32_t x, uint32_t y, uint8_t colour);
+void put_pixel(int32_t x, int32_t y, uint8_t colour);
 void draw_rect(uint32_t x, uint32_t y,  uint32_t width, uint32_t height, uint8_t colour);
+void draw_circle(int32_t center_x, int32_t center_y, int32_t radius, uint8_t colour);
 #endif //PONG_OS_GRAPHICS_H

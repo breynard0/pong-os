@@ -14,5 +14,6 @@ extern void main()
         }
     }
 
-    draw_rect(160, HEIGHT / 4, WIDTH / 2, HEIGHT / 2, RED);
+    draw_rect(WIDTH / 4, HEIGHT / 4, WIDTH / 2, HEIGHT / 2, RED);
+    draw_circle(WIDTH / 2, HEIGHT / 2, 80, GREEN);
 }

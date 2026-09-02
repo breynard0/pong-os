@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "io.h"
+#include "math.h"
 
 static const void* VGA_BASE_ADDRESS = (void*)0xA0000;
 
@@ -36,11 +37,11 @@ static void single_8_channel(const uint32_t byte_offset, uint8_t buffer[8], uint
         uint8_t bit = (p_byte & (1 << i)) != 0;
         if (bit)
         {
-            buffer[i] |= 1 << plane;
+            buffer[7 - i] |= 1 << plane;
         }
         else
         {
-            buffer[i] &= ~(1 << plane);
+            buffer[7 - i] &= ~(1 << plane);
         }
     }
 }
@@ -60,7 +61,7 @@ static uint8_t make_from_bits(const uint8_t bit_values[8], uint8_t idx)
     {
         uint8_t cur_bit_byte = bit_values[i];
         uint8_t cur_bit_value = (cur_bit_byte & (0x1 << idx)) != 0;
-        out |= cur_bit_value << i;
+        out |= cur_bit_value << (7 - i);
     }
     return out;
 }
@@ -81,7 +82,7 @@ static uint32_t compute_byte_offset(const uint32_t byte_x, const uint32_t byte_y
     return byte_y * WIDTH / 8 + byte_x;
 }
 
-void put_pixel(const uint32_t x, const uint32_t y, const uint8_t colour)
+void put_pixel(const int32_t x, const int32_t y, const uint8_t colour)
 {
     if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return;
 
@@ -133,5 +134,19 @@ void draw_rect(const uint32_t x, const uint32_t y, uint32_t width, const uint32_
             byte_offset++;
         }
         byte_offset = compute_byte_offset(x / 8, draw_y + 1);
+    }
+}
+
+void draw_circle(const int32_t center_x, const int32_t center_y, int32_t radius, const uint8_t colour)
+{
+    for (int32_t x = center_x - radius; x <= center_x + radius; x++)
+    {
+        for (int32_t y = center_y - radius; y <= center_y + radius; y++)
+        {
+            if (distance(absolute(center_x - x), absolute(center_y - y)) <= radius)
+            {
+                put_pixel(x, y, colour);
+            }
+        }
     }
 }
