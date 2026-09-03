@@ -81,7 +81,7 @@ __attribute__((interrupt)) static void keyboard_interrupt(struct interrupt_frame
     PIC_sendEOI(1);
 }
 
-uint32_t counter = 0;
+volatile uint32_t counter = 0;
 
 struct interrupt_frame;
 

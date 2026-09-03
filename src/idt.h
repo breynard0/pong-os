@@ -21,7 +21,7 @@ struct __attribute__((packed)) IDTDescriptor32
 
 extern struct IDTDescriptor32 idt_descriptor;
 
-extern uint32_t counter;
+extern volatile uint32_t counter;
 
 void init_idt();
 

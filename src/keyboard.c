@@ -128,8 +128,8 @@ static const struct KeyMapping mappings[256] = {
 };
 
 // special case for inputs
-uint8_t left_down = 0;
-uint8_t right_down = 0;
+volatile uint8_t left_down = 0;
+volatile uint8_t right_down = 0;
 
 char scancode_to_char(uint8_t scancode)
 {
