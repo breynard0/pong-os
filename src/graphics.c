@@ -101,7 +101,6 @@ void draw_rect(const uint32_t x, const uint32_t y, const uint32_t width, const u
 
     uint32_t byte_offset = compute_byte_offset(x / 8, y);
 
-
     uint8_t colours_full[8] = {colour, colour, colour, colour, colour, colour, colour, colour};
 
     for (int draw_y = y; draw_y < end_y; draw_y++)
@@ -112,7 +111,9 @@ void draw_rect(const uint32_t x, const uint32_t y, const uint32_t width, const u
             {
                 uint8_t colours_left[8] = {};
                 read_video_bytes_8_channel(compute_byte_offset(draw_x, draw_y), colours_left);
-                for (int i = x % 8; i < 8; i++)
+                int bound = 8;
+                if (x / 8 == end_x / 8) bound = end_x % 8;
+                for (int i = x % 8; i < bound; i++)
                 {
                     colours_left[i] = colour;
                 }

@@ -1,2 +1,2 @@
-extern main
-jmp main
+extern kmain
+jmp kmain

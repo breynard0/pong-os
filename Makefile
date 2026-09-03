@@ -1,3 +1,6 @@
+#VIDEO_MODE := 0x02 # text
+VIDEO_MODE := 0x12 # pong
+
 init_build_env:
 	rm -r work
 	mkdir -p work
@@ -6,7 +9,7 @@ init_build_env:
 build_c:
 	cd work
 	nasm -f elf32 -o kernel_bootstrap.o ../src/kernel_bootstrap.asm
-	i686-elf-gcc -m32 -ffreestanding -c ../src/kernel.c -o kernel.o
+	i686-elf-gcc -m32 -ffreestanding -DVIDEO_MODE=$(VIDEO_MODE) -c ../src/kernel.c -o kernel.o
 	i686-elf-gcc -m32 -ffreestanding -mgeneral-regs-only -c ../src/idt.c -o idt.o
 	i686-elf-gcc -m32 -ffreestanding -mgeneral-regs-only -c ../src/vga.c -o vga.o
 	i686-elf-gcc -m32 -ffreestanding -mgeneral-regs-only -c ../src/io.c -o io.o
@@ -20,7 +23,7 @@ build_c:
 build_asm: build_c
 	cd work
 # build bootloader
-	nasm -f bin -o bootloader_unbootable.bin ../src/bootloader.asm
+	nasm -f bin -DVIDEO_MODE=$(VIDEO_MODE) -o bootloader_unbootable.bin ../src/bootloader.asm
 # set up bootloader.bin to be bootable
 	dd if=/dev/zero of=bootloader.bin bs=1 count=510 conv=notrunc
 	echo -e -n "\x55\xAA" | dd of=bootloader.bin oflag=append conv=notrunc

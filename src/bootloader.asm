@@ -31,11 +31,9 @@ gdtr:
 KERNEL_OFFSET equ 0x1000
 KERNEL_SECTOR_COUNT equ 0x30
 
-; text
-; VIDEO_MODE equ 0x02
-
-; graphics
-VIDEO_MODE equ 0x12
+%ifndef VIDEO_MODE
+ %define VIDEO_MODE 0x12
+%endif
 
 boot_drive: db 0
 

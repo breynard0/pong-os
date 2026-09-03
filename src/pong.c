@@ -1,6 +1,7 @@
 #include "pong.h"
 
 #include "graphics.h"
+#include "io.h"
 #include "math.h"
 
 #define PADDLE_WIDTH (WIDTH / 8)
@@ -81,16 +82,6 @@ void pong_tick(int8_t paddle_dir)
     if (game.game_initialized != 42)
     {
         return;
-    }
-
-    // draw sad face if lost
-    if (game.game_lost)
-    {
-        draw_rect(WIDTH * 2 / 5, HEIGHT / 4, WIDTH / 10, HEIGHT / 3, RED);
-        draw_rect(WIDTH * 3 / 5, HEIGHT / 4, WIDTH / 10, HEIGHT / 3, RED);
-        draw_rect(WIDTH * 2 / 5, HEIGHT / 4 + HEIGHT / 3 + HEIGHT / 8, WIDTH * 2 / 5 - HEIGHT / 8, HEIGHT / 8, RED);
-        draw_rect(WIDTH * 2 / 5 - HEIGHT / 8, HEIGHT / 4 + HEIGHT / 3 + 2 * HEIGHT / 8, HEIGHT / 8, HEIGHT / 8, RED);
-        draw_rect(WIDTH * 4 / 5 - HEIGHT / 8, HEIGHT / 4 + HEIGHT / 3 + 2 * HEIGHT / 8, HEIGHT / 8, HEIGHT / 8, RED);
     }
 
     // move ball
@@ -203,6 +194,24 @@ void pong_tick(int8_t paddle_dir)
     {
         game.ball_colour++;
         if (game.ball_colour >= WHITE) game.ball_colour = LIGHT_GREEN;
+    }
+
+    // wait for screen to blank before we start drawing
+    while (inb(0x3DA) & 0x08)
+    {
+    }
+    while (!(inb(0x3DA) & 0x08))
+    {
+    }
+
+    // draw sad face if lost
+    if (game.game_lost)
+    {
+        draw_rect(WIDTH * 2 / 5, HEIGHT / 4, WIDTH / 10, HEIGHT / 3, RED);
+        draw_rect(WIDTH * 3 / 5, HEIGHT / 4, WIDTH / 10, HEIGHT / 3, RED);
+        draw_rect(WIDTH * 2 / 5, HEIGHT / 4 + HEIGHT / 3 + HEIGHT / 8, WIDTH * 2 / 5 - HEIGHT / 8, HEIGHT / 8, RED);
+        draw_rect(WIDTH * 2 / 5 - HEIGHT / 8, HEIGHT / 4 + HEIGHT / 3 + 2 * HEIGHT / 8, HEIGHT / 8, HEIGHT / 8, RED);
+        draw_rect(WIDTH * 4 / 5 - HEIGHT / 8, HEIGHT / 4 + HEIGHT / 3 + 2 * HEIGHT / 8, HEIGHT / 8, HEIGHT / 8, RED);
     }
 
     // draw ball

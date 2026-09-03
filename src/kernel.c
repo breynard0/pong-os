@@ -15,11 +15,17 @@ static void init_pit()
     return;
 }
 
-extern void main()
-{
-    init_pit();
+#ifndef VIDEO_MODE
+#define VIDEO_MODE 0x12
+#endif
 
+extern void kmain()
+{
     init_idt();
+
+    if (VIDEO_MODE != 0x12) return;
+
+    init_pit();
 
     init_pong();
     uint32_t last_counter = 0;
