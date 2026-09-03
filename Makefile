@@ -9,7 +9,7 @@ init_build_env:
 build_c:
 	cd work
 	nasm -f elf32 -o kernel_bootstrap.o ../src/kernel_bootstrap.asm
-	i686-elf-gcc -O0 -m32 -ffreestanding -mgeneral-regs-only -DVIDEO_MODE=$(VIDEO_MODE) -c ../src/kernel.c -o kernel.o
+	i686-elf-gcc -O3 -m32 -ffreestanding -mgeneral-regs-only -DVIDEO_MODE=$(VIDEO_MODE) -c ../src/kernel.c -o kernel.o
 	i686-elf-gcc -O3 -m32 -ffreestanding -mgeneral-regs-only -c ../src/idt.c -o idt.o
 	i686-elf-gcc -O3 -m32 -ffreestanding -mgeneral-regs-only -c ../src/vga.c -o vga.o
 	i686-elf-gcc -O3 -m32 -ffreestanding -mgeneral-regs-only -c ../src/io.c -o io.o
